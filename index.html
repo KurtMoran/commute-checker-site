@@ -88,7 +88,7 @@
   .who{padding:22px}
   .who ul{margin:12px 0 0;padding-left:18px;color:#c0c4ca;font-size:15px}
 
-  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch}
+  .plans{display:grid;grid-template-columns:repeat(2,minmax(0,400px));justify-content:center;gap:16px;align-items:stretch}
   .plan{padding:26px;display:flex;flex-direction:column}
   .plan.best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--shadow)}
   .plan .tag{align-self:flex-start;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
@@ -152,7 +152,7 @@
         <a class="btn" href="#pricing">Get my report — $19</a>
         <a class="btn ghost" href="#sample">See a sample</a>
       </div>
-      <p class="fine">Delivered by email within 24 hours. Any two addresses in the US.</p>
+      <p class="fine">Private report link emailed within 24 hours. Any two addresses in the US.</p>
     </div>
     <div class="card hero-card">
       <h4>Same house, same office, same 10.3 miles</h4>
@@ -202,7 +202,7 @@
     <div class="steps">
       <div class="card step"><b>1</b><h3>Tell us the two addresses</h3><p>The home you're considering and where you work. Add a second workplace or a school if you need one.</p></div>
       <div class="card step"><b>2</b><h3>We model the whole week</h3><p>We compute the predicted drive for every departure slot, morning and evening, Monday through Friday, using historical traffic patterns for that exact route.</p></div>
-      <div class="card step"><b>3</b><h3>You get the report</h3><p>A PDF and a web link: best and worst times to leave, when traffic builds and clears, and what the commute costs you in hours per year.</p></div>
+      <div class="card step"><b>3</b><h3>You get the report</h3><p>A private web report: best and worst times to leave, when traffic builds and clears, and what the commute costs you in hours per year.</p></div>
     </div>
   </div>
 </section>
@@ -215,8 +215,8 @@
     <div class="steps whos">
       <div class="card who"><h3>Home buyers</h3><p>Compare the commute from each house on your shortlist before you make an offer.</p>
         <ul><li>Side-by-side comparison of up to 3 homes</li><li>Both directions, every weekday</li></ul></div>
-      <div class="card who"><h3>Realtors</h3><p>Put a branded commute report in every listing packet and answer the question buyers always ask.</p>
-        <ul><li>Your name, photo and logo on the report</li><li>Commutes to the major job centers near the listing</li></ul></div>
+      <div class="card who"><h3>Renters</h3><p>About to sign a 12-month lease? Check the drive to work before you commit to it.</p>
+        <ul><li>One report per apartment you're considering</li><li>See which weekdays are worst for your route</li></ul></div>
       <div class="card who"><h3>Relocating for work</h3><p>Moving to a city you don't know? See which neighborhoods are really 20 minutes from the office.</p>
         <ul><li>Test several neighborhoods against one office</li><li>Useful for HR and relocation teams too</li></ul></div>
     </div>
@@ -232,21 +232,15 @@
       <div class="card plan">
         <h3>One home</h3>
         <div class="price">$19</div>
-        <ul><li>One home, one workplace</li><li>Morning and evening, Mon–Fri</li><li>PDF and web link</li><li>Delivered within 24 hours</li></ul>
+        <ul><li>One home, one workplace</li><li>Morning and evening, Mon–Fri</li><li>Private web report, opens 3 times in 30 days</li><li>Link emailed within 24 hours</li></ul>
         <a class="btn ghost buy" data-plan="single" href="#pricing">Get one report</a>
       </div>
       <div class="card plan best">
         <span class="tag">Most popular</span>
         <h3>Compare homes</h3>
         <div class="price">$39</div>
-        <ul><li>Up to 3 homes against one workplace</li><li>Side-by-side comparison page</li><li>Hours-per-year difference between homes</li><li>Delivered within 24 hours</li></ul>
+        <ul><li>Up to 3 homes against one workplace</li><li>Side-by-side comparison page</li><li>Hours-per-year difference between homes</li><li>Private web report, opens 3 times in 30 days</li><li>Link emailed within 24 hours</li></ul>
         <a class="btn buy" data-plan="compare" href="#pricing">Compare 3 homes</a>
-      </div>
-      <div class="card plan">
-        <h3>Realtor pack</h3>
-        <div class="price">$199 <small>/ 25 reports</small></div>
-        <ul><li>Your branding on every report</li><li>Commutes to nearby job centers per listing</li><li>Use them whenever, they don't expire</li><li>About $8 per listing</li></ul>
-        <a class="btn ghost buy" data-plan="realtor" href="#pricing">Get the realtor pack</a>
       </div>
     </div>
   </div>
@@ -256,9 +250,10 @@
   <div class="wrap">
     <div class="eyebrow">FAQ</div>
     <h2>Questions</h2>
-    <details><summary>Can't I just check a maps app?</summary><p>You can check one departure time at a time. A full picture of one route is a few hundred lookups: every 10 minutes, both directions, five weekdays. The report does all of them and shows you the pattern, including which weekdays are worse and exactly when traffic builds and clears.</p></details>
+    <details><summary>Can't I just check a maps app?</summary><p>You can check one departure time at a time. A full picture of one route is about 170 lookups: every 15 minutes, morning and evening, five weekdays. The report does all of them and shows you the pattern, including which weekdays are worse and exactly when traffic builds and clears.</p></details>
     <details><summary>Where do the numbers come from?</summary><p>Predicted drive times from a historical traffic model, by day of week and time of day, for your exact route. It's a typical week. One-off crashes, weather and events aren't in it.</p></details>
     <details><summary>How accurate is it?</summary><p>It reflects typical conditions. Expect real days to vary by a few minutes either way, and more during holidays or major events. The shape of the curve (when it builds, when it peaks, which days are worst) is the reliable part.</p></details>
+    <details><summary>How long can I view my report?</summary><p>Each time your report opens, it runs about 170 live traffic lookups. To keep costs and computing down, it opens 3 times in 30 days. Take a screenshot to keep your copy.</p></details>
     <details><summary>How fast do I get it?</summary><p>Within 24 hours of ordering, usually much sooner.</p></details>
     <details><summary>What about transit, biking or school drop-off?</summary><p>Reports are for driving right now. You can add a second destination such as a school when you order.</p></details>
   </div>
@@ -278,8 +273,8 @@
     <h2>The fine print, in plain words</h2>
     <p class="sub">&nbsp;</p>
     <details open><summary>Contact</summary><p>Email <a href="mailto:kurtmorann@gmail.com">kurtmorann@gmail.com</a> with any question about an order or a report. We reply within one business day. Commute Checker is based in San Diego, California.</p></details>
-    <details><summary>Delivery</summary><p>Reports are digital. We email a PDF and a web link to the address you give at checkout within 24 hours of your order. Nothing is shipped. Every purchase is one-time and there are no subscriptions or recurring charges.</p></details>
-    <details><summary>Refunds</summary><p>If you're not happy with a report, reply to the delivery email or write to the address above within 14 days of delivery and we'll refund the full amount. Unused realtor pack reports can be refunded pro rata within 30 days of purchase.</p></details>
+    <details><summary>Delivery</summary><p>Reports are digital. We email a private link to your web report to the address you give at checkout within 24 hours of your order. The report can be opened 3 times within 30 days of delivery. Nothing is shipped. Every purchase is one-time and there are no subscriptions or recurring charges.</p></details>
+    <details><summary>Refunds</summary><p>If you're not happy with a report, reply to the delivery email or write to the address above within 14 days of delivery and we'll refund the full amount.</p></details>
     <details><summary>Privacy</summary><p>We collect your email address and the street addresses you submit, and we use them only to produce and deliver your report. We don't sell or share your information. Payments are processed by Stripe, so we never see your card number. Email us and we'll delete your order details.</p></details>
     <details><summary>Terms</summary><p>Reports show predicted drive times under typical traffic, based on historical patterns. They are estimates for planning, not guarantees, and real conditions vary with crashes, weather, events and road work. Commute Checker is not liable for decisions made using a report. Prices are in US dollars.</p></details>
   </div>
@@ -292,7 +287,7 @@
 
 <script>
 /* ---------- CONFIG: paste your Stripe Payment Links here ---------- */
-const BUY_URLS = { single: "", compare: "", realtor: "" };
+const BUY_URLS = { single: "", compare: "" };
 /* ------------------------------------------------------------------ */
 
 // Real output: evening drive, 10.3 mi, 10-minute departure slots from 12:00pm to 8:00pm.

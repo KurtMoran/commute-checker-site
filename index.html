@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commute Checker — know the commute before you buy the house</title>
+<meta name="description" content="A commute report for any home address: predicted drive time for every departure time, every weekday. See when traffic builds before you sign.">
+<style>
+  :root{
+    --bg:#141518; --card:#1c1e24; --card2:#202229; --ink:#ececec; --muted:#9aa0a6;
+    --line:#2c2f37; --accent:#4f8cff; --accent-weak:rgba(79,140,255,.16);
+    --heat:#f0a63a; --hot:#ff5a3c;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 34px rgba(0,0,0,.38);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  header{position:sticky;top:0;z-index:20;background:rgba(20,21,24,.86);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;gap:24px;height:60px}
+  .brand{font-weight:700;letter-spacing:.2px;text-decoration:none;display:flex;align-items:center;gap:10px}
+  .brand i{display:inline-grid;grid-template-columns:repeat(3,6px);gap:2px}
+  .brand i b{width:6px;height:6px;border-radius:1.5px;background:var(--accent)}
+  .brand i b:nth-child(2),.brand i b:nth-child(6){background:var(--heat)}
+  .brand i b:nth-child(5){background:var(--hot)}
+  nav{margin-left:auto;display:flex;gap:22px;align-items:center}
+  nav a{text-decoration:none;color:var(--muted);font-size:14px}
+  nav a:hover{color:var(--ink)}
+  .btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;
+    padding:12px 20px;border-radius:10px;border:0;cursor:pointer;font-size:15px}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn.small{padding:8px 14px;font-size:14px}
+  nav .btn{color:#fff}
+
+  .hero{padding:72px 0 40px}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+  h1{font-size:clamp(34px,5vw,54px);line-height:1.06;margin:0 0 18px;letter-spacing:-.02em}
+  h1 em{font-style:normal;color:var(--heat)}
+  .lede{font-size:18px;color:#c9ccd1;margin:0 0 28px;max-width:34em}
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .fine{color:var(--muted);font-size:13px;margin-top:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+  .hero-card{padding:20px}
+  .hero-card h4{margin:0 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 16px}
+  .versus div{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .versus small{display:block;color:var(--muted);font-size:12px}
+  .versus strong{font-size:34px;line-height:1.1;display:block;margin-top:4px}
+  .versus .bad strong{color:var(--hot)}
+  .versus .good strong{color:#6ea8ff}
+
+  section{padding:64px 0}
+  section.alt{background:#17181c;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  h2{font-size:clamp(26px,3.4vw,36px);margin:0 0 10px;letter-spacing:-.01em}
+  .sub{color:var(--muted);margin:0 0 32px;max-width:46em}
+  .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+
+  .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .tile small{color:var(--muted);font-size:12px;display:block}
+  .tile strong{font-size:24px;display:block;margin:4px 0 2px}
+  .tile span{color:var(--muted);font-size:13px}
+  .report{padding:22px}
+  .report h3{margin:0 0 2px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .report + .report{margin-top:16px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+  svg{display:block;width:100%;height:auto}
+  svg text{fill:var(--muted);font:11px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .scale{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin-top:10px}
+  .scale i{flex:0 0 180px;height:8px;border-radius:4px;
+    background:linear-gradient(90deg,#1d2942,#2f4f86,#f0a63a,#ff5a3c)}
+  .caption{color:var(--muted);font-size:13px;margin-top:14px}
+  #tip{position:fixed;pointer-events:none;background:#0d0e11;border:1px solid var(--line);color:var(--ink);
+    padding:6px 9px;border-radius:8px;font-size:12px;opacity:0;transition:opacity .08s;z-index:50;white-space:nowrap}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .step{padding:22px}
+  .step b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;
+    background:var(--accent-weak);color:var(--accent);margin-bottom:12px}
+  .step h3,.who h3{margin:0 0 6px;font-size:18px}
+  .step p,.who p{margin:0;color:#c0c4ca;font-size:15px}
+  .who{padding:22px}
+  .who ul{margin:12px 0 0;padding-left:18px;color:#c0c4ca;font-size:15px}
+
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch}
+  .plan{padding:26px;display:flex;flex-direction:column}
+  .plan.best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--shadow)}
+  .plan .tag{align-self:flex-start;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+    color:var(--accent);background:var(--accent-weak);padding:3px 8px;border-radius:999px;margin-bottom:10px}
+  .plan h3{margin:0;font-size:18px}
+  .price{font-size:42px;font-weight:700;margin:8px 0 2px;letter-spacing:-.02em}
+  .price small{font-size:15px;color:var(--muted);font-weight:500}
+  .plan ul{list-style:none;padding:0;margin:16px 0 24px;color:#c0c4ca;font-size:15px;flex:1}
+  .plan li{padding:6px 0 6px 24px;position:relative}
+  .plan li:before{content:"";position:absolute;left:2px;top:13px;width:10px;height:5px;
+    border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg)}
+  .plan .btn{text-align:center}
+
+  details{border-bottom:1px solid var(--line);padding:16px 0}
+  summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:16px}
+  summary::-webkit-details-marker{display:none}
+  summary:after{content:"+";color:var(--muted);font-weight:400}
+  details[open] summary:after{content:"–"}
+  details p{color:#c0c4ca;margin:10px 0 0;max-width:52em}
+
+  .final{text-align:center}
+  .final .sub{margin-left:auto;margin-right:auto}
+  footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px;padding:26px 0}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0d0e11;
+    border:1px solid var(--line);padding:12px 16px;border-radius:10px;font-size:14px;opacity:0;
+    pointer-events:none;transition:opacity .2s;z-index:60;max-width:calc(100vw - 32px)}
+  #toast.on{opacity:1}
+
+  @media (max-width:860px){
+    .hero{padding:44px 0 24px}
+    .hero .wrap{grid-template-columns:1fr;gap:28px}
+    .tiles{grid-template-columns:repeat(2,1fr)}
+    .steps,.plans,.whos{grid-template-columns:1fr !important}
+    nav a:not(.btn){display:none}
+    section{padding:48px 0}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top"><i><b></b><b></b><b></b><b></b><b></b><b></b></i>Commute Checker</a>
+    <nav>
+      <a href="#sample">Sample report</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn small" href="#pricing">Get a report</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Know the commute <em>before</em> you buy the house.</h1>
+      <p class="lede">You toured it on a Sunday and the drive took 14 minutes. Commute Checker shows you the same drive at every departure time, every weekday, so you see the Wednesday 4:15pm version before you sign anything.</p>
+      <div class="cta-row">
+        <a class="btn" href="#pricing">Get my report — $19</a>
+        <a class="btn ghost" href="#sample">See a sample</a>
+      </div>
+      <p class="fine">Delivered by email within 24 hours. Any two addresses in the US.</p>
+    </div>
+    <div class="card hero-card">
+      <h4>Same house, same office, same 10.3 miles</h4>
+      <div class="versus">
+        <div class="good"><small>Leave at 1:00pm</small><strong>14 min</strong></div>
+        <div class="bad"><small>Leave Wed at 4:15pm</small><strong>33 min</strong></div>
+      </div>
+      <svg id="miniheat" viewBox="0 0 490 110" role="img" aria-label="Heatmap preview of drive time by weekday and departure time"></svg>
+      <p class="caption" style="margin-top:10px">Drive time by day and departure time, from a real report.</p>
+    </div>
+  </div>
+</div>
+
+<section class="alt" id="sample">
+  <div class="wrap">
+    <div class="eyebrow">Sample report</div>
+    <h2>What you get</h2>
+    <p class="sub">This is real report output for an evening drive home: 10.3 miles across San Diego, addresses removed. Your report covers both directions, morning and evening.</p>
+
+    <div class="tiles">
+      <div class="tile"><small>Traffic starts building</small><strong>2:26pm</strong><span>flat 15 min before that</span></div>
+      <div class="tile"><small>Worst time to leave</small><strong>4:16pm</strong><span>33 min on Wed and Thu</span></div>
+      <div class="tile"><small>Back to normal by</small><strong>6:09pm</strong><span>under 18 min again</span></div>
+      <div class="tile"><small>Leaving 4:15 vs 6:30</small><strong>≈55 hrs / yr</strong><span>extra time in the car</span></div>
+    </div>
+
+    <div class="card report">
+      <h3>Drive time by departure, each weekday</h3>
+      <div class="legend" id="legend"></div>
+      <svg id="lines" viewBox="0 0 980 320" role="img" aria-label="Line chart of drive time by departure time for each weekday"></svg>
+    </div>
+
+    <div class="card report">
+      <h3>Where the traffic is, by day and time</h3>
+      <svg id="heat" viewBox="0 0 980 230" role="img" aria-label="Heatmap of drive time by weekday and departure time"></svg>
+      <div class="scale"><span>14 min</span><i></i><span>33 min</span></div>
+      <p class="caption">Monday peaks at 25 minutes. Wednesday and Thursday hit 33. If your office has flexible days, that alone is worth knowing.</p>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="eyebrow">How it works</div>
+    <h2>Two addresses in, one clear answer out</h2>
+    <p class="sub">No app to install and nothing to learn.</p>
+    <div class="steps">
+      <div class="card step"><b>1</b><h3>Tell us the two addresses</h3><p>The home you're considering and where you work. Add a second workplace or a school if you need one.</p></div>
+      <div class="card step"><b>2</b><h3>We model the whole week</h3><p>We compute the predicted drive for every departure slot, morning and evening, Monday through Friday, using historical traffic patterns for that exact route.</p></div>
+      <div class="card step"><b>3</b><h3>You get the report</h3><p>A PDF and a web link: best and worst times to leave, when traffic builds and clears, and what the commute costs you in hours per year.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow">Who it's for</div>
+    <h2>A $19 check on a $500,000 decision</h2>
+    <p class="sub">&nbsp;</p>
+    <div class="steps whos">
+      <div class="card who"><h3>Home buyers</h3><p>Compare the commute from each house on your shortlist before you make an offer.</p>
+        <ul><li>Side-by-side comparison of up to 3 homes</li><li>Both directions, every weekday</li></ul></div>
+      <div class="card who"><h3>Realtors</h3><p>Put a branded commute report in every listing packet and answer the question buyers always ask.</p>
+        <ul><li>Your name, photo and logo on the report</li><li>Commutes to the major job centers near the listing</li></ul></div>
+      <div class="card who"><h3>Relocating for work</h3><p>Moving to a city you don't know? See which neighborhoods are really 20 minutes from the office.</p>
+        <ul><li>Test several neighborhoods against one office</li><li>Useful for HR and relocation teams too</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="eyebrow">Pricing</div>
+    <h2>Pay per report. No subscription.</h2>
+    <p class="sub">Not happy with your report? Reply to the delivery email within 14 days for a full refund.</p>
+    <div class="plans">
+      <div class="card plan">
+        <h3>One home</h3>
+        <div class="price">$19</div>
+        <ul><li>One home, one workplace</li><li>Morning and evening, Mon–Fri</li><li>PDF and web link</li><li>Delivered within 24 hours</li></ul>
+        <a class="btn ghost buy" data-plan="single" href="#pricing">Get one report</a>
+      </div>
+      <div class="card plan best">
+        <span class="tag">Most popular</span>
+        <h3>Compare homes</h3>
+        <div class="price">$39</div>
+        <ul><li>Up to 3 homes against one workplace</li><li>Side-by-side comparison page</li><li>Hours-per-year difference between homes</li><li>Delivered within 24 hours</li></ul>
+        <a class="btn buy" data-plan="compare" href="#pricing">Compare 3 homes</a>
+      </div>
+      <div class="card plan">
+        <h3>Realtor pack</h3>
+        <div class="price">$199 <small>/ 25 reports</small></div>
+        <ul><li>Your branding on every report</li><li>Commutes to nearby job centers per listing</li><li>Use them whenever, they don't expire</li><li>About $8 per listing</li></ul>
+        <a class="btn ghost buy" data-plan="realtor" href="#pricing">Get the realtor pack</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="faq">
+  <div class="wrap">
+    <div class="eyebrow">FAQ</div>
+    <h2>Questions</h2>
+    <details><summary>Can't I just check a maps app?</summary><p>You can check one departure time at a time. A full picture of one route is a few hundred lookups: every 10 minutes, both directions, five weekdays. The report does all of them and shows you the pattern, including which weekdays are worse and exactly when traffic builds and clears.</p></details>
+    <details><summary>Where do the numbers come from?</summary><p>Predicted drive times from a historical traffic model, by day of week and time of day, for your exact route. It's a typical week. One-off crashes, weather and events aren't in it.</p></details>
+    <details><summary>How accurate is it?</summary><p>It reflects typical conditions. Expect real days to vary by a few minutes either way, and more during holidays or major events. The shape of the curve (when it builds, when it peaks, which days are worst) is the reliable part.</p></details>
+    <details><summary>How fast do I get it?</summary><p>Within 24 hours of ordering, usually much sooner.</p></details>
+    <details><summary>What about transit, biking or school drop-off?</summary><p>Reports are for driving right now. You can add a second destination such as a school when you order.</p></details>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2>See the 4:15pm version first.</h2>
+    <p class="sub">You'll make this drive about 460 times a year.</p>
+    <a class="btn" href="#pricing">Get my report — $19</a>
+  </div>
+</section>
+
+<section class="alt" id="policies">
+  <div class="wrap">
+    <div class="eyebrow">Contact and policies</div>
+    <h2>The fine print, in plain words</h2>
+    <p class="sub">&nbsp;</p>
+    <details open><summary>Contact</summary><p>Email <a href="mailto:kurtmorann@gmail.com">kurtmorann@gmail.com</a> with any question about an order or a report. We reply within one business day. Commute Checker is based in San Diego, California.</p></details>
+    <details><summary>Delivery</summary><p>Reports are digital. We email a PDF and a web link to the address you give at checkout within 24 hours of your order. Nothing is shipped. Every purchase is one-time and there are no subscriptions or recurring charges.</p></details>
+    <details><summary>Refunds</summary><p>If you're not happy with a report, reply to the delivery email or write to the address above within 14 days of delivery and we'll refund the full amount. Unused realtor pack reports can be refunded pro rata within 30 days of purchase.</p></details>
+    <details><summary>Privacy</summary><p>We collect your email address and the street addresses you submit, and we use them only to produce and deliver your report. We don't sell or share your information. Payments are processed by Stripe, so we never see your card number. Email us and we'll delete your order details.</p></details>
+    <details><summary>Terms</summary><p>Reports show predicted drive times under typical traffic, based on historical patterns. They are estimates for planning, not guarantees, and real conditions vary with crashes, weather, events and road work. Commute Checker is not liable for decisions made using a report. Prices are in US dollars.</p></details>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">© Commute Checker · <a href="mailto:kurtmorann@gmail.com">kurtmorann@gmail.com</a> · <a href="#policies">Refunds, privacy and terms</a> · Drive times are predictions of typical traffic, not guarantees.</div></footer>
+<div id="tip"></div>
+<div id="toast"></div>
+
+<script>
+/* ---------- CONFIG: paste your Stripe Payment Links here ---------- */
+const BUY_URLS = { single: "", compare: "", realtor: "" };
+/* ------------------------------------------------------------------ */
+
+// Real output: evening drive, 10.3 mi, 10-minute departure slots from 12:00pm to 8:00pm.
+const DATA = {"Mon":[14.8,14.8,14.9,14.9,14.8,14.7,14.6,14.8,15.0,14.9,14.9,14.9,15.2,15.3,15.7,18.2,18.2,20.3,21.2,20.8,21.0,23.1,23.1,23.2,23.8,24.1,24.3,23.7,22.8,21.2,21.7,20.7,19.8,17.2,16.4,14.8,14.4,14.1,14.0,14.1,13.8,13.8,13.9,13.8,13.8,13.8,13.7,13.7,13.5],"Tue":[14.6,14.8,14.7,14.7,14.8,14.8,14.8,14.9,14.9,15.0,15.0,15.1,15.5,15.9,16.6,20.3,20.1,22.5,23.8,24.0,26.4,28.5,30.1,30.6,30.0,30.6,31.9,31.2,30.4,29.6,29.2,29.1,28.8,27.3,26.2,24.3,20.9,19.5,17.4,15.4,15.4,14.6,14.3,14.3,14.2,14.0,14.0,14.0,13.9],"Wed":[14.7,14.8,14.8,14.9,14.8,14.8,14.8,14.8,14.9,14.9,14.9,15.0,15.6,15.9,17.4,20.7,20.9,23.7,25.4,25.9,28.0,29.1,29.9,31.3,31.9,32.2,32.2,32.1,31.4,30.9,30.2,29.5,29.1,26.9,25.5,22.9,20.4,19.1,17.0,15.5,15.0,14.3,14.3,14.5,14.2,14.1,14.1,14.0,13.9],"Thu":[15.0,15.0,14.9,14.9,15.1,15.0,14.9,15.0,15.1,15.3,15.2,15.2,16.1,16.0,18.1,21.2,21.4,23.8,25.8,25.8,28.2,29.9,30.6,32.2,31.8,31.8,32.5,31.8,31.5,30.6,31.4,31.4,30.3,28.6,26.9,24.7,22.2,20.5,18.5,16.3,15.9,14.9,14.1,14.1,13.8,13.8,13.8,13.8,13.8],"Fri":[14.9,15.1,15.1,15.1,15.2,15.1,15.5,15.3,15.5,15.8,15.9,16.5,17.8,18.0,19.3,22.4,22.1,24.4,25.7,25.6,27.1,27.5,27.7,27.8,28.0,26.9,25.8,25.1,24.0,22.5,22.7,21.6,20.7,18.4,17.8,16.1,15.2,15.0,14.5,14.3,14.2,14.1,14.1,14.1,14.0,13.9,13.9,13.8,13.8]};
+const DAYS = ["Mon","Tue","Wed","Thu","Fri"];
+const DAY_COLORS = {Mon:"#6ea8ff",Tue:"#a78bfa",Wed:"#f0a63a",Thu:"#ff6b57",Fri:"#4fd1a5"};
+const T0 = 720, STEP = 10, N = DATA.Mon.length, LO = 13.5, HI = 33;
+const NS = "http://www.w3.org/2000/svg";
+
+function el(tag, attrs, parent){
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function clock(min){
+  const h = Math.floor(min/60), m = min%60;
+  return ((h%12)||12) + ":" + String(m).padStart(2,"0") + (h<12?"am":"pm");
+}
+const STOPS = [[0,[29,41,66]],[.35,[47,79,134]],[.7,[240,166,58]],[1,[255,90,60]]];
+function heatColor(v){
+  const t = Math.max(0, Math.min(1, (v-LO)/(HI-LO)));
+  for (let i=1;i<STOPS.length;i++){
+    if (t <= STOPS[i][0]){
+      const [t0,c0] = STOPS[i-1], [t1,c1] = STOPS[i], f = (t-t0)/(t1-t0);
+      return "rgb(" + c0.map((c,j)=>Math.round(c+(c1[j]-c)*f)).join(",") + ")";
+    }
+  }
+}
+
+const tip = document.getElementById("tip");
+function showTip(e, html){ tip.innerHTML = html; tip.style.opacity = 1;
+  tip.style.left = Math.min(e.clientX+12, innerWidth-tip.offsetWidth-8)+"px"; tip.style.top = (e.clientY-34)+"px"; }
+function hideTip(){ tip.style.opacity = 0; }
+
+function drawHeat(svg, W, H, labels){
+  const left = labels?44:0, bottom = labels?22:0, cw = (W-left)/N, rh = (H-bottom)/DAYS.length;
+  DAYS.forEach((d,r)=>{
+    if (labels) el("text",{x:left-10,y:r*rh+rh/2+4,"text-anchor":"end"},svg).textContent = d;
+    DATA[d].forEach((v,c)=>{
+      const cell = el("rect",{x:left+c*cw,y:r*rh,width:cw+.5,height:rh-2,fill:heatColor(v)},svg);
+      cell.addEventListener("mousemove",e=>showTip(e,`<b>${d} ${clock(T0+c*STEP)}</b> · ${v.toFixed(0)} min`));
+      cell.addEventListener("mouseleave",hideTip);
+    });
+  });
+  if (labels) for (let m=T0;m<=T0+(N-1)*STEP;m+=60)
+    el("text",{x:left+((m-T0)/STEP+.5)*cw,y:H-4,"text-anchor":"middle"},svg).textContent = clock(m).replace(":00","");
+}
+
+function drawLines(svg, W, H){
+  const L=44,R=10,T=10,B=26, y0=10, y1=35;
+  const X = i => L + i*(W-L-R)/(N-1), Y = v => T + (y1-v)*(H-T-B)/(y1-y0);
+  for (let v=15; v<=35; v+=5){
+    el("line",{x1:L,x2:W-R,y1:Y(v),y2:Y(v),stroke:"#2c2f37","stroke-width":1},svg);
+    el("text",{x:L-10,y:Y(v)+4,"text-anchor":"end"},svg).textContent = v+" min";
+  }
+  for (let m=T0;m<=T0+(N-1)*STEP;m+=60)
+    el("text",{x:X((m-T0)/STEP),y:H-6,"text-anchor":"middle"},svg).textContent = clock(m).replace(":00","");
+  DAYS.forEach(d=>{
+    el("polyline",{points:DATA[d].map((v,i)=>X(i).toFixed(1)+","+Y(v).toFixed(1)).join(" "),
+      fill:"none",stroke:DAY_COLORS[d],"stroke-width":2.5,"stroke-linejoin":"round","stroke-linecap":"round"},svg);
+  });
+  const guide = el("line",{y1:T,y2:H-B,stroke:"#6b7079","stroke-width":1,opacity:0},svg);
+  const hit = el("rect",{x:L,y:T,width:W-L-R,height:H-T-B,fill:"transparent"},svg);
+  hit.addEventListener("mousemove",e=>{
+    const box = svg.getBoundingClientRect(), px = (e.clientX-box.left)*W/box.width;
+    const i = Math.max(0,Math.min(N-1,Math.round((px-L)*(N-1)/(W-L-R))));
+    guide.setAttribute("x1",X(i)); guide.setAttribute("x2",X(i)); guide.setAttribute("opacity",1);
+    showTip(e,`<b>Leave ${clock(T0+i*STEP)}</b><br>`+DAYS.map(d=>`<span style="color:${DAY_COLORS[d]}">${d}</span> ${DATA[d][i].toFixed(0)} min`).join(" · "));
+  });
+  hit.addEventListener("mouseleave",()=>{guide.setAttribute("opacity",0);hideTip();});
+  document.getElementById("legend").innerHTML = DAYS.map(d=>`<span><i style="background:${DAY_COLORS[d]}"></i>${d}</span>`).join("");
+}
+
+drawHeat(document.getElementById("miniheat"), 490, 110, false);
+drawHeat(document.getElementById("heat"), 980, 230, true);
+drawLines(document.getElementById("lines"), 980, 320);
+
+const toast = document.getElementById("toast");
+document.querySelectorAll(".buy").forEach(a=>{
+  const url = BUY_URLS[a.dataset.plan];
+  if (url) { a.href = url; return; }
+  a.addEventListener("click",e=>{
+    e.preventDefault();
+    toast.textContent = "Online checkout opens in a few days. To order now, email kurtmorann@gmail.com with your two addresses.";
+    toast.classList.add("on"); setTimeout(()=>toast.classList.remove("on"),6000);
+  });
+});
+</script>
+</body>
+</html>
